@@ -327,7 +327,7 @@ void process()
 {
     clrscr();
     std::string choice_str;
-        ll choice = -1; // Initialize choice to -1
+        ll choice = -1;
     if (state == 0)
     {
         std::cout << "=== MAIN MENU ===\n";
@@ -349,18 +349,16 @@ void process()
         }
     }
     choice_str = get_input("\nEnter choice: ");
-        // Parse without exceptions using C API `strtoll` (errno-based)
         char *endptr = nullptr;
         errno = 0;
         long long tmp = std::strtoll(choice_str.c_str(), &endptr, 10);
-        // Valid when at least one character was consumed, entire string consumed, and no range/parse error
         if (endptr != choice_str.c_str() && *endptr == '\0' && errno == 0)
         {
             choice = tmp;
         }
         else
         {
-            choice = -1; // Set choice to -1 if parsing failed
+            choice = -1;
         }
     if (state == 0)
     {
@@ -443,3 +441,4 @@ int main()
     }
     return 0;
 }
+
