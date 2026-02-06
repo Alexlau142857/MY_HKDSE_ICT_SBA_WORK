@@ -25,3 +25,9 @@
  - add function (admin can delete the account)
 
  - Other debugging and improvement...
+
+ > TODO :
+
+ - try to use SQL file to store the account data(?)
+
+ - other...
