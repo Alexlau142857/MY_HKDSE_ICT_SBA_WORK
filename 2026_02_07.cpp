@@ -1,95 +1,14 @@
-// Run this code with C++20 (C17) standard
-#include <cassert>
-#include <cctype>
-#include <cerrno>
-#include <cfenv>
-#include <cfloat>
-#include <cinttypes>
-#include <climits>
-#include <clocale>
-#include <cmath>
-#include <csetjmp>
-#include <csignal>
-#include <cstdarg>
-#include <cstddef>
-#include <cstdint>
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-#include <ctime>
-#include <cuchar>
-#include <cwchar>
-#include <cwctype>
-#include <charconv>
-#include <algorithm>
-#include <any>
-#include <array>
-#include <atomic>
-#include <barrier>
-#include <bit>
-#include <bitset>
-#include <chrono>
-#include <concepts>
-#include <compare>
-#include <coroutine>
-#include <deque>
-#include <exception>
-#include <execution>
-#include <filesystem>
-#include <forward_list>
-#include <fstream>
-#include <functional>
-#include <future>
-#include <initializer_list>
-#include <iomanip>
-#include <ios>
-#include <iosfwd>
+// Compile with C++20 standard
+// g++ main.cpp -std=c++20 -o app
 #include <iostream>
-#include <istream>
-#include <iterator>
-#include <latch>
-#include <limits>
-#include <list>
-#include <locale>
-#include <map>
-#include <memory>
-#include <memory_resource>
-#include <mutex>
-#include <new>
-#include <numbers>
-#include <numeric>
-#include <optional>
-#include <ostream>
-#include <queue>
-#include <random>
-#include <ranges>
-#include <ratio>
-#include <regex>
-#include <scoped_allocator>
-#include <set>
-#include <shared_mutex>
-#include <span>
-#include <sstream>
-#include <stack>
-#include <stdexcept>
-#include <stop_token>
-#include <streambuf>
 #include <string>
-#include <string_view>
-#include <syncstream>
-#include <system_error>
-#include <thread>
-#include <tuple>
-#include <type_traits>
-#include <typeindex>
-#include <typeinfo>
-#include <unordered_map>
-#include <unordered_set>
-#include <utility>
-#include <valarray>
-#include <variant>
 #include <vector>
-#include <version>
+#include <map>
+#include <fstream>
+#include <sstream>
+#include <limits>
+#include <algorithm>
+#include <cctype>
 using ll = long long;
 // using ld = long double; using i128 = __ll128;
 // using namespace std;
@@ -327,7 +246,7 @@ void process()
 {
     clrscr();
     std::string choice_str;
-        ll choice = -1;
+    ll choice = -1;
     if (state == 0)
     {
         std::cout << "=== MAIN MENU ===\n";
@@ -349,17 +268,17 @@ void process()
         }
     }
     choice_str = get_input("\nEnter choice: ");
-        char *endptr = nullptr;
-        errno = 0;
-        long long tmp = std::strtoll(choice_str.c_str(), &endptr, 10);
-        if (endptr != choice_str.c_str() && *endptr == '\0' && errno == 0)
-        {
-            choice = tmp;
-        }
-        else
-        {
-            choice = -1;
-        }
+    char *endptr = nullptr;
+    errno = 0;
+    long long tmp = std::strtoll(choice_str.c_str(), &endptr, 10);
+    if (endptr != choice_str.c_str() && *endptr == '\0' && errno == 0)
+    {
+        choice = tmp;
+    }
+    else
+    {
+        choice = -1;
+    }
     if (state == 0)
     {
         switch (choice)
@@ -424,6 +343,7 @@ void process()
 
 int main()
 {
+    std::setlocale(LC_ALL, "");
     std::ifstream fin(database_file);
     if (fin.is_open())
     {
@@ -441,4 +361,3 @@ int main()
     }
     return 0;
 }
-
