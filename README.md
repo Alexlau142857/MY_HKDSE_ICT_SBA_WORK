@@ -1,20 +1,12 @@
 # ICT_SBA
 
- ***TODO*** :
-
 * Haven't decided the topic and use of the system
 
-* Mask password input (display '*' when typing)
+ ***TODO*** :
 
 * Use database (SQL) to store account data
 
-* Implement Account Lockout Mechanism (prevent brute force)
-
 * Implement Input Sanitization (prevent SQL injection)
-
-* Add "Change Password" & "Forgot Password" features
-
-* Add "Show/Hide Password" toggle
 
 * Create Audit Log (log.txt)
 
@@ -63,6 +55,21 @@
 
  - mordulize many function
 
+ - Other debugging and improvement...
+   
+ ---
+
+ > 2026.02.07
+
+
+ - Mask password input (display '*' when typing)
+
+ - Implement Account Lockout Mechanism (prevent brute force)
+
+ - Add "Change Password" & "Forgot Password" features
+   
+ - Add "Show/Hide Password" toggle
+   
  - Other debugging and improvement...
    
  ---
