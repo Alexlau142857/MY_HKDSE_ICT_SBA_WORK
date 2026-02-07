@@ -9,9 +9,25 @@
 #include <limits>
 #include <algorithm>
 #include <cctype>
+#include <ctime>
+#include <iomanip>
 using ll = long long;
-// using ld = long double; using i128 = __ll128;
-// using namespace std;
+#ifdef _WIN32
+#include <windows.h>
+#include <conio.h>
+#define KEY_BACKSPACE 8
+#define KEY_ENTER 13
+#define KEY_TAB 9
+#else
+#include <unistd.h>
+#include <termios.h>
+#define KEY_BACKSPACE 127
+#define KEY_ENTER 10
+#define KEY_TAB 9
+#endif
+
+const int MAX_LOGIN_ATTEMPTS = 5;
+const int LOCKOUT_DURATION = 30;
 
 class account
 {
@@ -20,17 +36,11 @@ public:
     std::string pw;
     account() : id(""), pw("") {}
     account(std::string x, std::string y) : id(x), pw(y) {}
-    auto operator<=>(const account &other) const
-    {
-        return id <=> other.id;
-    }
-    bool operator==(const account &other) const
-    {
-        return id == other.id;
-    }
 };
 
 std::map<std::string, account> accounts;
+std::map<std::string, int> failed_counts;
+std::map<std::string, time_t> lockout_time;
 account current_user;
 ll state = 0;
 bool is_admin = false;
@@ -38,7 +48,11 @@ const std::string database_file = "account.txt";
 
 void clrscr()
 {
+#ifdef _WIN32
+    system("cls");
+#else
     std::cout << "\033[2J\033[1;1H";
+#endif
 }
 
 void pause()
@@ -55,6 +69,63 @@ std::string get_input(const std::string &prompt)
     std::string line;
     std::getline(std::cin, line);
     return line;
+}
+
+std::string get_masked_input(const std::string &prompt)
+{
+    std::cout << prompt;
+    std::string password = "";
+    bool show_password = false;
+    char ch;
+    while (true)
+    {
+        ch = _getch();
+        if (ch == KEY_ENTER)
+        {
+            std::cout << std::endl;
+            break;
+        }
+        else if (ch == KEY_TAB)
+        {
+            show_password = !show_password;
+            std::cout << "\r" << std::string(80, ' ') << "\r";
+            std::cout << prompt;
+            if (show_password)
+            {
+                std::cout << password;
+            }
+            else
+            {
+                std::cout << std::string(password.length(), '*');
+            }
+        }
+        else if (ch == KEY_BACKSPACE)
+        {
+            if (!password.empty())
+            {
+                password.pop_back();
+                std::cout << "\b \b";
+                std::cout << "\r" << std::string(80, ' ') << "\r" << prompt;
+                if (show_password)
+                    std::cout << password;
+                else
+                    std::cout << std::string(password.length(), '*');
+            }
+        }
+        else if (std::isprint(ch))
+        {
+            password += ch;
+            if (show_password)
+            {
+                std::cout << ch;
+            }
+            else
+            {
+                std::cout << '*';
+            }
+        }
+    }
+    return password;
 }
 
 void save_data()
@@ -99,11 +170,37 @@ bool valid_pass(const std::string &pw)
     return up && low && num;
 }
 
+bool is_account_locked(const std::string &id)
+{
+    if (failed_counts[id] >= MAX_LOGIN_ATTEMPTS)
+    {
+        time_t now = std::time(nullptr);
+        double seconds_passed = std::difftime(now, lockout_time[id]);
+        if (seconds_passed < LOCKOUT_DURATION)
+        {
+            std::cout << ">> [LOCKED] Too many failed attempts. Try again in "
+                      << (LOCKOUT_DURATION - (int)seconds_passed) << " seconds.\n";
+            return true;
+        }
+        else
+        {
+            failed_counts[id] = 0;
+            return false;
+        }
+    }
+    return false;
+}
+
 void handle_login()
 {
     std::cout << "=== LOGIN ===" << std::endl;
     std::string input_id = get_input("User ID: ");
-    std::string input_pw = get_input("Password: ");
+    if (input_id != "admin" && is_account_locked(input_id))
+    {
+        return;
+    }
+    std::cout << "(Press 'Tab' to show/hide password)\n";
+    std::string input_pw = get_masked_input("Password: ");
     if (input_id == "admin" && input_pw == "admin")
     {
         current_user = account("admin", "admin");
@@ -112,20 +209,29 @@ void handle_login()
         std::cout << ">> Login succeeded as Administrator!" << std::endl;
         return;
     }
+
     auto it = accounts.find(input_id);
     if (it != accounts.end() && it->second.pw == input_pw)
     {
         current_user = it->second;
         is_admin = false;
         state = 1;
+        failed_counts[input_id] = 0;
         std::cout << ">> Login succeeded! Welcome, " << current_user.id << "." << std::endl;
     }
     else
     {
         std::cout << ">> Login failed! Invalid ID or Password." << std::endl;
-        if (accounts.find(input_id) != accounts.end())
+        if (it != accounts.end())
         {
-            std::cout << "   (Hll: User ID exists, but password was incorrect.)" << std::endl;
+            failed_counts[input_id]++;
+            lockout_time[input_id] = std::time(nullptr);
+            int remaining = MAX_LOGIN_ATTEMPTS - failed_counts[input_id];
+
+            if (remaining > 0)
+                std::cout << "   (Warning: " << remaining << " attempts remaining before lockout)\n";
+            else
+                std::cout << "   (Account locked for " << LOCKOUT_DURATION << " seconds)\n";
         }
     }
 }
@@ -150,7 +256,8 @@ void handle_register()
     while (true)
     {
         std::cout << "Password Requirements:\n - 8 to 16 characters\n - At least 1 Uppercase, 1 Lowercase, 1 Digit\n";
-        new_pw = get_input("Enter Password: ");
+        std::cout << "(Press 'Tab' to show/hide password)\n";
+        new_pw = get_masked_input("Enter Password: ");
 
         if (valid_pass(new_pw))
             break;
@@ -164,6 +271,36 @@ void handle_register()
     state = 1;
     is_admin = false;
     std::cout << ">> Registration successful! You are now logged in." << std::endl;
+}
+
+void handle_change_password()
+{
+    if (is_admin && current_user.id == "admin")
+    {
+        std::cout << "Admin password can not be changed for security reasons." << std::endl;
+        return;
+    }
+    std::cout << "=== CHANGE PASSWORD ===" << std::endl;
+    std::string old_pw = get_masked_input("Enter Old Password: ");
+    if (old_pw != current_user.pw)
+    {
+        std::cout << ">> Incorrect old password!" << std::endl;
+        return;
+    }
+    std::string new_pw;
+    while (true)
+    {
+        std::cout << "\nNew Password Requirements:\n - 8 to 16 characters\n - At least 1 Uppercase, 1 Lowercase, 1 Digit\n";
+        new_pw = get_masked_input("Enter New Password: ");
+
+        if (valid_pass(new_pw))
+            break;
+        std::cout << ">> Password too weak." << std::endl;
+    }
+    current_user.pw = new_pw;
+    accounts[current_user.id].pw = new_pw;
+    save_data();
+    std::cout << ">> Password changed successfully!" << std::endl;
 }
 
 void handle_logout()
@@ -235,6 +372,8 @@ void admin_delete_user()
     {
         save_data();
         std::cout << ">> Account " << del_id << " deleted." << std::endl;
+        failed_counts.erase(del_id);
+        lockout_time.erase(del_id);
     }
     else
     {
@@ -258,6 +397,7 @@ void process()
     {
         std::cout << "=== USER MENU (" << current_user.id << ") ===\n";
         std::cout << "1. Logout\n";
+        std::cout << "2. Change Password\n";
         if (is_admin)
         {
             std::cout << "\n[Admin Controls]\n";
@@ -268,17 +408,16 @@ void process()
         }
     }
     choice_str = get_input("\nEnter choice: ");
-    char *endptr = nullptr;
-    errno = 0;
-    long long tmp = std::strtoll(choice_str.c_str(), &endptr, 10);
-    if (endptr != choice_str.c_str() && *endptr == '\0' && errno == 0)
+    try
     {
-        choice = tmp;
+        if (!choice_str.empty())
+            choice = std::stoll(choice_str);
     }
-    else
+    catch (...)
     {
         choice = -1;
     }
+
     if (state == 0)
     {
         switch (choice)
@@ -305,6 +444,11 @@ void process()
         if (choice == 1)
         {
             handle_logout();
+            pause();
+        }
+        else if (choice == 2)
+        {
+            handle_change_password();
             pause();
         }
         else if (is_admin)
