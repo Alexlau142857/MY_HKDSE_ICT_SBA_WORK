@@ -2,15 +2,26 @@
 
  ***TODO*** :
 
- - haven not decided the topic and use of the system
+* Haven't decided the topic and use of the system
 
- - make the login system better
+* Mask password input (display '*' when typing)
 
- - when the user input the paaword, the password will be instead by '*'
+* Use database (SQL) to store account data
 
- - try to use SQL file to store the account data(?)
+* Implement Account Lockout Mechanism (prevent brute force)
 
- - other...
+* Implement Input Sanitization (prevent SQL injection)
+
+* Add "Change Password" & "Forgot Password" features
+
+* Add "Show/Hide Password" toggle
+
+* Create Audit Log (log.txt)
+
+* Define Role Hierarchy (Admin, Moderator, User)
+
+* other...
+
 
  ---
    
