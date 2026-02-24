@@ -10,6 +10,8 @@
 
 * Define Role Hierarchy (Admin, Moderator, User)
 
+* Encrypt a file, Decrypt a file, issue public key, issue private key
+
 * other...
 
 
