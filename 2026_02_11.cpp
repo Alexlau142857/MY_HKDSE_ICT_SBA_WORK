@@ -337,7 +337,7 @@ void logout()
     std::cout << ">> Logout succeeded." << std::endl;
 }
 
-void admin_view_all()
+void admin_view_all() 
 {
     std::cout << "--- All Accounts ---" << std::endl;
     if (accounts.empty())
@@ -351,7 +351,7 @@ void admin_view_all()
     }
 }
 
-void admin_import_file()
+void admin_import_file() 
 {
     std::string filename = get_input("Enter filename to import: ");
     std::ifstream fin(filename);
@@ -424,6 +424,7 @@ void process()
         std::cout << "=== USER MENU (" << current_user.id << ") ===\n";
         std::cout << "1. Logout\n";
         std::cout << "2. Change Password\n";
+        // TODO : Encrypt a file, Decrypt a file, issue public key, issue private key, etc. (if time allows)
         if (is_admin)
         {
             std::cout << "\n[Admin Controls]\n";
@@ -443,7 +444,6 @@ void process()
     {
         choice = -1;
     }
-
     if (state == 0)
     {
         switch (choice)
