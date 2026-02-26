@@ -1,5 +1,6 @@
 // Compile with C++14 standard
-// g++ main.cpp -std=c++14 -o app
+// g++ code.cpp -std=c++14 -o code
+// ./code
 #include <iostream>
 #include <string>
 #include <vector>
@@ -78,7 +79,9 @@ ll bin_search (account a){
     ll idx = 0;
     for (const auto &entry : accounts) {
         if (entry.first == a.id)
+        {
             return idx;
+        }
         idx++;
     }
     return -1;
@@ -89,7 +92,9 @@ void pause1()
     std::cout << "\n> Press <Enter> to continue...";
     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     if (std::cin.gcount() == 0)
+    {
         std::cin.get();
+    }
 }
 
 std::string get_input(const std::string &prompt)
@@ -136,18 +141,26 @@ std::string hind_password(const std::string &prompt)
                 std::cout << "\b \b";
                 std::cout << "\r" << std::string(80, ' ') << "\r" << prompt;
                 if (ok)
+                {
                     std::cout << pass;
+                }
                 else
+                {
                     std::cout << std::string(pass.length(), '*');
+                }
             }
         }
         else if (std::isprint((unsigned char)ch))
         {
             pass += (char)ch;
             if (ok)
+            {
                 std::cout << (char)ch;
+            }
             else
+            {
                 std::cout << '*';
+            }
         }
     }
     return pass;
@@ -157,7 +170,10 @@ void save_data()
 {
     std::ofstream fout(database_file);
     if (!fout.is_open())
+    {
+        std::cerr << "Error opening database file for writing." << std::endl;
         return;
+    }
     for (const auto& entry: accounts)
     {
         fout << entry.first << " " << entry.second.pw << std::endl;
@@ -168,30 +184,44 @@ void save_data()
 bool okid(const std::string &id)
 {
     if (id.empty())
+    {
         return false;
+    }
     for (unsigned char ch : id)
     {
         if (std::isspace(ch))
+        {
             return false;
+        }
     }
-    if (id.length() > 16 || id.length() < 8){
+    if (id.length() > 16 || id.length() < 8)
+    {
         return false;
-    }return true;
+    }
+    return true;
 }
 
 bool okpassword(const std::string &pw)
 {
     if (pw.length() < 8 || pw.length() > 16)
+    {
         return false;
+    }
     bool up = false, low = false, num = false;
     for (unsigned char ch : pw)
     {
         if (std::isupper(ch))
+        {
             up = true;
+        }
         else if (std::islower(ch))
+        {
             low = true;
+        }
         else if (std::isdigit(ch))
+        {
             num = true;
+        }
     }
     return up && low && num;
 }
@@ -235,7 +265,6 @@ void login()
         std::cout << ">> Login succeeded as Administrator!" << std::endl;
         return;
     }
-
     auto it = accounts.find(input_id);
     if (it != accounts.end() && it->second.pw == input_pw)
     {
@@ -254,9 +283,13 @@ void login()
             lockout_time[input_id] = std::time(nullptr);
             ll remaining = MAX_LOGIN_ATTEMPTS - failed_counts[input_id];
             if (remaining > 0)
+            {
                 std::cout << "   (Warning: " << remaining << " attempts remaining before lockout)\n";
+            }
             else
+            {
                 std::cout << "   (Account locked for " << LOCKOUT_DURATION << " seconds)\n";
+            }
         }
     }
 }
@@ -267,7 +300,7 @@ void register_user()
     std::string new_id = get_input("User ID: ");
     if (!okid(new_id))
     {
-        std::cout << ">> Invalid ID! Cannot be empty or contain spaces." << std::endl;
+        std::cout << ">> Invalid ID! Cannot be empty, contain spaces or length not between 8 and 16 characters." << std::endl;
         return;
     }
     if (accounts.count(new_id) > 0)
@@ -282,9 +315,10 @@ void register_user()
         std::cout << "(Press 'Tab' to show/hide password)\n";
         new_pw = hind_password("Enter Password: ");
         if (okpassword(new_pw))
+        {
             break;
-        std::cout << ">> Password too weak. Please try again.\n"
-                  << std::endl;
+        }
+        std::cout << ">> Password too weak. Please try again.\n" << std::endl;
     }
     account new_acc(new_id, new_pw);
     accounts[new_id] = new_acc;
@@ -370,7 +404,9 @@ void admin_import_file()
     }
     fin.close();
     if (count > 0)
+    {
         save_data();
+    }
     std::cout << ">> Imported " << count << " new accounts." << std::endl;
 }
 
