@@ -1,5 +1,5 @@
 User_ID: Password: 
-lkkc2024 band1A
-lkkc2025 band1B
-tpyc2025 band1C
-tpyc2026 band1C
+lkkc2024 band1Aband1A
+lkkc2025 band1Bband1B
+tpyc2025 band1Cband1C
+tpyc2026 band1Cband1C
